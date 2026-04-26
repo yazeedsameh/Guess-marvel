@@ -1,0 +1,827 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARVEL QUIZ UNIVERSE</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #E8231A;
+  --red-dark: #A01510;
+  --gold: #C8A84B;
+  --gold-light: #F0C060;
+  --dark: #0A0A0F;
+  --dark2: #111118;
+  --dark3: #1A1A24;
+  --dark4: #22222E;
+  --text: #E8E8F0;
+  --muted: #8888AA;
+  --border: rgba(200,168,75,0.25);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Rajdhani',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;overflow-x:hidden}
+h1,h2,h3,.label{font-family:'Bebas Neue',sans-serif;letter-spacing:2px}
+body::before{content:'';position:fixed;inset:0;background-image:repeating-linear-gradient(45deg,rgba(200,168,75,0.03) 0,rgba(200,168,75,0.03) 1px,transparent 0,transparent 50%);background-size:30px 30px;pointer-events:none;z-index:0}
+.screen{display:none;min-height:100vh;position:relative;z-index:1}
+.screen.active{display:flex;flex-direction:column}
+#home{align-items:center;justify-content:center;padding:2rem}
+.home-logo{text-align:center;margin-bottom:3rem}
+.home-logo .marvel-text{font-family:'Bebas Neue',sans-serif;font-size:clamp(60px,12vw,120px);color:var(--red);line-height:1;text-shadow:0 0 60px rgba(232,35,26,0.4)}
+.home-logo .sub{font-size:clamp(16px,3vw,28px);color:var(--gold);letter-spacing:8px}
+.mode-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;width:100%;max-width:900px}
+.mode-card{background:var(--dark3);border:1px solid var(--border);border-radius:12px;padding:2rem;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.mode-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(232,35,26,0.05),transparent);opacity:0;transition:.3s}
+.mode-card:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 12px 40px rgba(232,35,26,0.2)}
+.mode-card:hover::before{opacity:1}
+.mode-icon{font-size:3rem;margin-bottom:1rem;display:block}
+.mode-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold);letter-spacing:2px}
+.mode-desc{font-size:.95rem;color:var(--muted);margin-top:.5rem;line-height:1.5}
+.mode-badge{position:absolute;top:1rem;right:1rem;background:var(--red);color:white;font-size:.7rem;padding:2px 8px;border-radius:20px;font-weight:700;letter-spacing:1px}
+.monster-card{background:linear-gradient(135deg,#1a0606,#1a1a24)!important;border-color:rgba(255,50,0,0.4)!important}
+.monster-card:hover{border-color:#ff4400!important;box-shadow:0 12px 40px rgba(255,68,0,0.35)!important}
+.game-nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;background:rgba(10,10,15,0.95);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.nav-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gold);letter-spacing:3px}
+.nav-score{display:flex;align-items:center;gap:1rem}
+.score-display{background:var(--dark3);border:1px solid var(--border);padding:.3rem 1rem;border-radius:6px;font-size:1.1rem;font-weight:700;color:var(--gold-light)}
+.btn-home{background:transparent;border:1px solid var(--red);color:var(--red);padding:.3rem .8rem;border-radius:6px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.9rem;transition:.2s}
+.btn-home:hover{background:var(--red);color:white}
+.game-area{flex:1;padding:1.5rem;max-width:800px;margin:0 auto;width:100%}
+.question-counter{text-align:center;color:var(--muted);font-size:.9rem;margin-bottom:1rem;letter-spacing:2px}
+.progress-bar{height:3px;background:var(--dark4);border-radius:2px;margin-bottom:1.5rem;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--gold));transition:width .5s ease;border-radius:2px}
+.hint-box{background:var(--dark3);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1.5rem}
+.hint-title{font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:1.2rem;letter-spacing:2px;margin-bottom:.75rem}
+.hard-hint-box{background:linear-gradient(135deg,rgba(232,35,26,0.08),var(--dark3));border:1px solid rgba(232,35,26,0.35);border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.hard-hint-box::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--red),var(--gold))}
+.hard-hint-label{font-family:'Bebas Neue',sans-serif;color:var(--red);font-size:.85rem;letter-spacing:3px;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem}
+.hard-hint-text{font-size:1rem;line-height:1.65;color:var(--text)}
+.guess-input-wrap{display:flex;gap:.75rem}
+.guess-input{flex:1;background:var(--dark3);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:1rem;outline:none;transition:.2s}
+.guess-input:focus{border-color:var(--gold)}
+.btn-submit{background:var(--red);color:white;border:none;padding:.75rem 1.5rem;border-radius:8px;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;transition:.2s;white-space:nowrap}
+.btn-submit:hover{background:var(--red-dark)}
+.movie-guess-form{display:flex;flex-direction:column;gap:.75rem}
+.btn-reveal-hint{background:var(--dark3);border:1px solid var(--border);color:var(--muted);padding:.5rem 1rem;border-radius:6px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:.9rem;transition:.2s;text-align:center}
+.btn-reveal-hint:hover{border-color:var(--gold);color:var(--gold)}
+.villain-clues{display:flex;flex-direction:column;gap:1rem;margin-bottom:1.5rem}
+.clue-card{background:var(--dark3);border:1px solid var(--border);border-radius:10px;padding:1.25rem 1.5rem;position:relative;overflow:hidden}
+.clue-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red)}
+.clue-num{font-family:'Bebas Neue',sans-serif;color:var(--red);font-size:.9rem;letter-spacing:2px;margin-bottom:.3rem}
+.clue-text{font-size:1rem;line-height:1.5}
+.clue-locked{opacity:.3;filter:blur(3px);user-select:none}
+.clue-locked .clue-text::after{content:'??? ??? ??? ???';display:block}
+.mc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.mc-btn{background:var(--dark3);border:1px solid var(--border);border-radius:8px;padding:1rem;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:600;color:var(--text);transition:all .2s;text-align:left}
+.mc-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold);background:rgba(200,168,75,0.05)}
+.mc-btn.correct{background:rgba(20,180,80,0.15);border-color:#14B450;color:#14B450}
+.mc-btn.wrong{background:rgba(232,35,26,0.15);border-color:var(--red);color:var(--red)}
+.mc-btn:disabled{cursor:default}
+.lives-display{display:flex;gap:.5rem;align-items:center;margin-bottom:1rem}
+.life-icon{font-size:1.3rem;transition:.3s}
+.life-icon.lost{opacity:.2;filter:grayscale(1)}
+.quote-card{background:var(--dark3);border:1px solid var(--border);border-radius:12px;padding:2rem;margin-bottom:1.5rem;text-align:center;position:relative}
+.quote-card::before{content:'"';position:absolute;top:-.5rem;left:1rem;font-size:6rem;color:rgba(200,168,75,0.1);font-family:'Bebas Neue',sans-serif;line-height:1}
+.quote-text{font-size:clamp(1rem,2.5vw,1.3rem);line-height:1.7;font-style:italic;color:var(--text);position:relative;z-index:1}
+.result-overlay{position:fixed;inset:0;background:rgba(5,5,10,0.95);z-index:200;display:flex;align-items:center;justify-content:center;display:none}
+.result-overlay.show{display:flex}
+.result-card{background:var(--dark2);border:1px solid var(--border);border-radius:16px;padding:2.5rem;max-width:520px;width:90%;text-align:center;position:relative}
+.result-icon{font-size:4rem;margin-bottom:1rem}
+.result-correct{color:#14B450;font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:3px}
+.result-wrong{color:var(--red);font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:3px}
+.result-answer{font-size:1.3rem;margin:1rem 0;color:var(--gold)}
+.result-points{font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--gold-light);margin:.5rem 0}
+.fun-fact{background:var(--dark3);border-radius:8px;padding:1rem;margin:1rem 0;font-size:.95rem;color:var(--muted);line-height:1.6;text-align:left;border-left:3px solid var(--gold)}
+.fun-fact strong{color:var(--gold-light)}
+.btn-next{background:var(--red);color:white;border:none;padding:.85rem 2.5rem;border-radius:8px;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;transition:.2s;margin-top:.5rem}
+.btn-next:hover{background:var(--red-dark)}
+#gameover{align-items:center;justify-content:center;padding:2rem}
+.gameover-card{background:var(--dark2);border:1px solid var(--border);border-radius:16px;padding:2.5rem;max-width:560px;width:100%;text-align:center}
+.gameover-title{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;color:var(--red);letter-spacing:4px}
+.final-score{font-family:'Bebas Neue',sans-serif;font-size:5rem;color:var(--gold);line-height:1}
+.score-label{color:var(--muted);letter-spacing:3px;font-size:.9rem;margin-bottom:.5rem}
+.breakdown{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin:1.5rem 0;text-align:left}
+.break-item{background:var(--dark3);border-radius:8px;padding:.75rem 1rem;border:1px solid var(--border)}
+.break-label{font-size:.8rem;color:var(--muted);letter-spacing:1px}
+.break-val{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--gold)}
+.gameover-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1rem}
+.btn-primary{background:var(--red);color:white;border:none;padding:.75rem 2rem;border-radius:8px;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;transition:.2s}
+.btn-primary:hover{background:var(--red-dark)}
+.btn-secondary{background:transparent;color:var(--gold);border:1px solid var(--gold);padding:.75rem 2rem;border-radius:8px;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;transition:.2s}
+.btn-secondary:hover{background:rgba(200,168,75,.1)}
+#leaderboard-screen{align-items:center;justify-content:flex-start;padding:2rem}
+.lb-wrap{max-width:620px;width:100%;margin:0 auto}
+.lb-title{font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--gold);letter-spacing:4px;text-align:center;margin-bottom:2rem}
+.lb-table{width:100%;border-collapse:collapse}
+.lb-table th{text-align:left;padding:.5rem 1rem;color:var(--muted);font-size:.8rem;letter-spacing:2px;border-bottom:1px solid var(--border)}
+.lb-table td{padding:.75rem 1rem;border-bottom:1px solid rgba(255,255,255,0.05);font-size:1rem}
+.lb-rank{font-family:'Bebas Neue',sans-serif;font-size:1.4rem}
+.lb-rank.gold{color:#FFD700}.lb-rank.silver{color:#C0C0C0}.lb-rank.bronze{color:#CD7F32}
+.lb-mode-badge{font-size:.7rem;padding:2px 8px;border-radius:20px;border:1px solid var(--border);color:var(--muted)}
+.lb-score-val{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gold)}
+.lb-date{color:var(--muted);font-size:.85rem}
+.suggestion-list{position:absolute;bottom:100%;left:0;right:0;background:var(--dark2);border:1px solid var(--border);border-radius:8px 8px 0 0;overflow:hidden;z-index:10;display:none}
+.suggestion-list.show{display:block}
+.suggestion-item{padding:.6rem 1rem;cursor:pointer;font-size:.95rem;transition:.15s}
+.suggestion-item:hover{background:var(--dark3);color:var(--gold)}
+.guess-input-wrap{position:relative}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.anim-slideup{animation:slideUp .4s ease forwards}
+.anim-shake{animation:shake .3s ease}
+@media(max-width:600px){.mc-grid{grid-template-columns:1fr}.mode-grid{grid-template-columns:1fr}.breakdown{grid-template-columns:1fr}.gameover-btns{flex-direction:column}}
+.btn-skip{background:transparent;border:1px solid var(--muted);color:var(--muted);padding:.5rem 1rem;border-radius:6px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:.85rem;transition:.2s;margin-top:.75rem}
+.btn-skip:hover{border-color:var(--red);color:var(--red)}
+.btn-lb{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:.3rem .8rem;border-radius:6px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.9rem;transition:.2s}
+.btn-lb:hover{background:rgba(200,168,75,.1)}
+/* MONSTER MODE */
+.monster-riddle{background:linear-gradient(135deg,#110808,#1a1a24);border:1px solid rgba(255,68,0,0.4);border-radius:12px;padding:2rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.monster-riddle::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#ff4400,var(--gold))}
+.monster-riddle-label{font-family:'Bebas Neue',sans-serif;color:#ff4400;font-size:.9rem;letter-spacing:3px;margin-bottom:.75rem}
+.monster-riddle-text{font-size:1.05rem;line-height:1.75;color:var(--text)}
+.monster-warning{background:rgba(255,68,0,0.08);border:1px solid rgba(255,68,0,0.25);border-radius:8px;padding:.75rem 1rem;margin-bottom:1rem;color:#ff7755;font-size:.9rem;text-align:center;letter-spacing:.5px}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+  <div class="home-logo anim-slideup">
+    <div class="marvel-text">MARVEL</div>
+    <div class="sub">QUIZ UNIVERSE</div>
+  </div>
+  <div class="mode-grid anim-slideup">
+    <div class="mode-card" onclick="startGame('silhouette')">
+      <span class="mode-icon">🦸</span>
+      <div class="mode-title">Guess the Hero</div>
+      <div class="mode-desc">A single difficult hint about a Marvel hero. No silhouette — just your knowledge. Type the hero's name to score.</div>
+      <span class="mode-badge">20 ROUNDS</span>
+    </div>
+    <div class="mode-card" onclick="startGame('movie')">
+      <span class="mode-icon">🎬</span>
+      <div class="mode-title">Guess the Scene</div>
+      <div class="mode-desc">One cryptic clue about a Marvel film. Name the movie — get it right and the game keeps rolling automatically.</div>
+      <span class="mode-badge">20 ROUNDS</span>
+    </div>
+    <div class="mode-card" onclick="startGame('villain')">
+      <span class="mode-icon">💀</span>
+      <div class="mode-title">Guess the Villain</div>
+      <div class="mode-desc">Three cryptic clues reveal a Marvel villain. Choose from 4 options — wrong answers cost you clues.</div>
+      <span class="mode-badge">20 ROUNDS</span>
+    </div>
+    <div class="mode-card" onclick="startGame('quote')">
+      <span class="mode-icon">💬</span>
+      <div class="mode-title">Guess the Quote</div>
+      <div class="mode-desc">A famous Marvel quote appears. Pick who said it from 4 choices. The faster you answer, the more points you earn.</div>
+      <span class="mode-badge">20 ROUNDS</span>
+    </div>
+    <div class="mode-card monster-card" onclick="startGame('monster')">
+      <span class="mode-icon">☠️</span>
+      <div class="mode-title" style="color:#ff4400">MONSTER MODE</div>
+      <div class="mode-desc" style="color:#cc6644">One cryptic riddle. No options. No hints. No skips. Type the exact answer from memory. One wrong answer ends the game.</div>
+      <span class="mode-badge" style="background:#ff4400">EXTREME</span>
+    </div>
+  </div>
+  <div style="margin-top:2rem">
+    <button class="btn-secondary" onclick="showLeaderboard()">🏆 LEADERBOARD</button>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="leaderboard-screen" class="screen">
+  <div class="lb-wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <button class="btn-home" onclick="showScreen('home')">← BACK</button>
+      <div class="lb-title" style="margin:0">TOP SCORES</div>
+      <div style="width:60px"></div>
+    </div>
+    <div id="lb-content"></div>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="game-screen" class="screen">
+  <div class="game-nav">
+    <button class="btn-home" onclick="confirmHome()">← HOME</button>
+    <div class="nav-title" id="game-nav-title">HERO MODE</div>
+    <div class="nav-score">
+      <button class="btn-lb" onclick="showLeaderboard()">🏆</button>
+      <div class="score-display" title="Points">⭐ <span id="score-display">0</span></div>
+      <div class="score-display" title="Tries" id="tries-display" style="color:#ff6b6b">❤️ <span id="tries-count">3</span></div>
+      <div class="score-display" title="Skips" id="skips-display" style="color:#74c0fc">⏭️ <span id="skips-count">2</span></div>
+    </div>
+  </div>
+  <div class="game-area">
+    <div class="question-counter" id="q-counter">QUESTION 1 / 20</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:5%"></div></div>
+    <div id="game-content"></div>
+  </div>
+</div>
+
+<!-- GAME OVER -->
+<div id="gameover" class="screen">
+  <div class="gameover-card anim-slideup">
+    <div class="gameover-title">GAME OVER</div>
+    <div class="score-label">FINAL SCORE</div>
+    <div class="final-score" id="final-score">0</div>
+    <div class="breakdown" id="score-breakdown"></div>
+    <div class="gameover-btns">
+      <button class="btn-primary" id="play-again-btn">PLAY AGAIN</button>
+      <button class="btn-secondary" onclick="showScreen('home')">HOME</button>
+      <button class="btn-secondary" onclick="showLeaderboard()">🏆 SCORES</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT OVERLAY -->
+<div class="result-overlay" id="result-overlay">
+  <div class="result-card anim-slideup">
+    <div class="result-icon" id="result-icon"></div>
+    <div id="result-verdict"></div>
+    <div class="result-answer" id="result-answer"></div>
+    <div class="result-points" id="result-points"></div>
+    <div class="fun-fact" id="result-funfact"></div>
+    <button class="btn-next" onclick="nextQuestion()">NEXT QUESTION →</button>
+  </div>
+</div>
+
+<script>
+// ==================== DATA ====================
+
+const HEROES = [
+  {name:"Spider-Man",hardHint:"This hero once made a deal with a literal demon to erase his marriage from history — and his aunt still doesn't know his greatest secret.",shape:"spiderman",fact:"Peter Parker was bitten by a radioactive spider. His real name was kept secret for years in the comics.",accept:["spider man","spiderman","peter parker","spider-man"]},
+  {name:"Iron Man",hardHint:"He built his first suit inside a cave as a prisoner, powered by a magnet he put in his own chest to stop shrapnel from killing him.",shape:"ironman",fact:"Tony Stark built his first suit in a cave with a box of scraps. Robert Downey Jr. improvised 'I am Iron Man.'",accept:["iron man","ironman","tony stark"]},
+  {name:"Black Panther",hardHint:"He is king of the only African nation never colonized, and he must eat a sacred purple plant to gain his enhanced abilities.",shape:"blackpanther",fact:"Black Panther was the first mainstream Black superhero in American comics, debuting in 1966.",accept:["black panther","t'challa","tchalla"]},
+  {name:"Thor",hardHint:"He was once stripped of his power and exiled to Earth as a mortal, and could not lift his own hammer until he chose to sacrifice himself for strangers.",shape:"thor",fact:"Thor's hammer Mjolnir was forged in the heart of a dying star by dwarven blacksmiths.",accept:["thor","thor odinson","god of thunder"]},
+  {name:"Captain America",hardHint:"He was frozen in ice for nearly 70 years and woke up in a world where everyone he knew had aged or died — yet he never stopped fighting for what was right.",shape:"capamerica",fact:"Steve Rogers was originally so small he was 4F (unfit) on his army physical 5 times before the super soldier program.",accept:["captain america","cap","steve rogers"]},
+  {name:"Black Widow",hardHint:"She was sterilized as part of her graduation from a Soviet assassin program, and later sacrificed herself so the universe could live.",shape:"blackwidow",fact:"Natasha Romanoff was trained in the Red Room, a Soviet program that brainwashed girls into becoming assassins.",accept:["black widow","natasha romanoff","natasha"]},
+  {name:"Hulk",hardHint:"His alter ego once tried to shoot himself in the head — but the other personality spit the bullet back out, making him truly impossible to kill.",shape:"hulk",fact:"The Hulk was originally grey in his first appearance. Stan Lee changed him to green because the grey kept printing inconsistently.",accept:["hulk","bruce banner","the hulk"]},
+  {name:"Hawkeye",hardHint:"He is the only core Avenger with zero superhuman abilities, yet was trusted with guarding the location of one of the most powerful objects in the universe.",shape:"hawkeye",fact:"Clint Barton briefly turned villain before becoming an Avenger. He also went completely deaf at one point in the comics.",accept:["hawkeye","clint barton","clint"]},
+  {name:"Doctor Strange",hardHint:"He defeated a dimension-devouring entity not through power, but by trapping it in a time loop — forcing it to beg for release after dying thousands of times.",shape:"docstrange",fact:"Doctor Strange was partly inspired by Chandu the Magician, a 1930s radio and film character.",accept:["doctor strange","dr strange","stephen strange","dr. strange"]},
+  {name:"Scarlet Witch",hardHint:"With just three words, she once depowered 90% of all mutants on Earth and rewrote reality itself — no weapon, no fight, just three words.",shape:"scarletwitch",fact:"Wanda Maximoff rewrote reality in House of M, depowering 90% of all mutants with three words: No more mutants.",accept:["scarlet witch","wanda","wanda maximoff","scarletwitch"]},
+  {name:"Wolverine",hardHint:"His entire skeleton was coated in indestructible metal against his will, and he has lived for over 130 years watching every person he has ever loved die.",shape:"wolverine",fact:"Wolverine's real name is James Howlett. His retractable claws were originally bone before being coated with adamantium.",accept:["wolverine","logan","james howlett"]},
+  {name:"Ant-Man",hardHint:"He stole a shrinking suit from its inventor to save his daughter, and once defeated a villain by going so small he entered the enemy's body from the inside.",shape:"antman",fact:"There have been three Ant-Men: Hank Pym, Scott Lang, and Eric O'Grady. Scott Lang stole the suit to save his daughter.",accept:["ant-man","ant man","antman","scott lang","hank pym"]},
+  {name:"Vision",hardHint:"He was born in a single day from a combination of an AI assistant, a god's lightning, and a cosmic gem — and once lifted a weapon only the worthy can hold.",shape:"vision",fact:"Vision was created from Thor's lightning, Tony's AI JARVIS, and the Mind Stone — making him truly one of a kind.",accept:["vision","the vision"]},
+  {name:"Groot",hardHint:"Despite repeating the exact same three words every time he speaks, he is actually saying completely different complex sentences — only one being understands him.",shape:"groot",fact:"Groot's species Flora colossus communicates through spores, which is why only Rocket can understand his nuanced 'I am Groot.'",accept:["groot","i am groot"]},
+  {name:"Rocket Raccoon",hardHint:"He hates being called what he visibly looks like, because painful experimentation turned him into what he is — and that rage is the source of all his obsessions.",shape:"rocket",fact:"Rocket Raccoon is named after a Beatles song. He was created through painful experimentation and struggles with his identity.",accept:["rocket raccoon","rocket","raccoon"]},
+  {name:"Star-Lord",hardHint:"His father is literally a living planet who gave his mother a fatal brain tumor on purpose, and he once held an Infinity Stone bare-handed without dying.",shape:"starlord",fact:"Peter Quill's Walkman and mix tape are central to the Guardians storyline — his mother gave them to him before she died.",accept:["star-lord","starlord","star lord","peter quill"]},
+  {name:"War Machine",hardHint:"He was shot out of the sky during a battle between the Avengers themselves, and was left paralyzed from the waist down — requiring Stark technology just to walk again.",shape:"warmachine",fact:"James 'Rhodey' Rhodes has worn multiple Iron Man suits. His War Machine armor has far more firepower than Tony's.",accept:["war machine","warmachine","james rhodes","rhodey","iron patriot"]},
+  {name:"Falcon",hardHint:"He was a counselor for veterans with PTSD before becoming a hero, and was personally chosen by the original shield-bearer to carry on his legacy.",shape:"falcon",fact:"Sam Wilson is the first Black Captain America in comics. He was originally a social worker before becoming the Falcon.",accept:["falcon","sam wilson","captain america"]},
+  {name:"Nebula",hardHint:"Every time she lost in combat to her sister, her adoptive father replaced a body part with cold machinery as punishment — until she was more machine than person.",shape:"nebula",fact:"In the comics, Nebula claims to be Thanos's granddaughter, not his adopted daughter. The MCU changed this relationship.",accept:["nebula"]},
+  {name:"Gamora",hardHint:"She is the last surviving member of her entire species — her adoptive father wiped out half her people 'to save' them from overpopulation, then took her as a prize.",shape:"gamora",fact:"Gamora is the last of her species, the Zehoberei. Thanos killed half of them 'saving' them from overpopulation.",accept:["gamora","gamora zen whoberi ben titan"]},
+];
+
+const MOVIES = [
+  {movie:"Iron Man",hardHint:"The villain in this film is the hero's own business partner, and the hero ends the movie by announcing his secret identity at a press conference.",fact:"Iron Man launched the entire MCU. Robert Downey Jr. improvised 'I am Iron Man' — that line wasn't in the script.",accept:["iron man"]},
+  {movie:"The Avengers",hardHint:"A demigod mind-controls the world's smartest men with a scepter, and the heroes only stop self-destructing after one of their own agents dies carrying vintage collectible cards.",fact:"The Avengers (2012) became the third highest-grossing film of all time at release, earning $1.5 billion worldwide.",accept:["the avengers","avengers"]},
+  {movie:"Guardians of the Galaxy",hardHint:"A thief, an assassin, a destroyer, a raccoon, and a tree are all arrested for grabbing the same stolen orb — and become heroes by dancing to stop a genocide.",fact:"The Guardians of the Galaxy was considered a huge risk — the characters were barely known outside comics.",accept:["guardians of the galaxy","guardians"]},
+  {movie:"Black Panther",hardHint:"The true villain has a legitimate argument about global inequality — he just wants to weaponize the world's most advanced nation to violently liberate the oppressed.",fact:"Black Panther was the first superhero film nominated for Best Picture at the Academy Awards.",accept:["black panther"]},
+  {movie:"Thor: Ragnarok",hardHint:"The hero must save his people not by protecting his home, but by triggering an ancient prophecy that requires destroying it — and the villain is his own secret elder sibling.",fact:"Ragnarok's iconic Immigrant Song sequence was director Taika Waititi's idea — he fought for it for over a year.",accept:["thor ragnarok","thor: ragnarok","ragnarok"]},
+  {movie:"Avengers: Infinity War",hardHint:"The villain wins completely. He gets everything he wants, wipes out half of all life, then retires to a farm — while the heroes lose and the film ends with no resolution.",fact:"The Russo Brothers kept the ending of Infinity War secret from most of the cast. Tom Holland didn't know he would die.",accept:["avengers infinity war","infinity war","avengers: infinity war"]},
+  {movie:"Spider-Man: Homecoming",hardHint:"The hero discovers his prom date's father is the villain during a car ride to pick her up — and the villain figures out the hero's secret identity at the exact same moment.",fact:"Michael Keaton, who played Batman in 1989, played the Vulture — making him the only actor to play both a DC and MCU villain.",accept:["spider-man homecoming","spider man homecoming","homecoming","spiderman homecoming"]},
+  {movie:"Doctor Strange",hardHint:"A car crash destroys a surgeon's hands, leading him to Nepal where he learns to fold reality itself — and defeats a cosmic being by refusing to stop dying until it surrenders.",fact:"The visual effects team invented new techniques for Doctor Strange — the 'Dormammu' bargaining scene took months of R&D.",accept:["doctor strange","dr strange"]},
+  {movie:"Captain America: Civil War",hardHint:"The real villain never throws a punch — he simply shows two heroes a video of a 1991 car accident, and lets their fury do the rest.",fact:"Civil War introduced Black Panther and Spider-Man to the MCU simultaneously — an unprecedented dual debut.",accept:["captain america civil war","civil war","captain america: civil war"]},
+  {movie:"Ant-Man",hardHint:"The climactic battle happens on a child's toy train set because the hero shrank everything — including himself to subatomic scale, nearly dying in the process.",fact:"The Thomas the Train fight scene was director Peyton Reed's commentary on superhero destruction — making it small stakes.",accept:["ant-man","ant man","antman"]},
+  {movie:"Captain Marvel",hardHint:"The hero has her memories erased and is fighting for the wrong side — because the supposed villains of the film are actually helpless refugees being hunted by her own people.",fact:"Goose the cat (actually named Chewie in comics) is a Flerken — an alien that can store pocket dimensions in its body.",accept:["captain marvel"]},
+  {movie:"Avengers: Endgame",hardHint:"The heroes steal from themselves across multiple timelines, undo the snap, and the man who started it all sacrifices himself using the exact same words that defined his debut.",fact:"Endgame's final battle reportedly involved over 3,000 VFX shots — the most in any film at that time.",accept:["avengers endgame","endgame","avengers: endgame"]},
+  {movie:"Thor",hardHint:"A god is stripped of power and exiled to New Mexico as a mortal, gets hit by a van twice, and can only reclaim his hammer by choosing to sacrifice himself for strangers.",fact:"Kenneth Branagh directed Thor, bringing his Shakespearean sensibility to the Asgardian royal family drama.",accept:["thor"]},
+  {movie:"Black Widow",hardHint:"The hero must face the man who built the program that turned her into a weapon, while discovering her 'sister' was never actually freed from mind control.",fact:"Black Widow was released simultaneously in theaters and Disney+ — one of the first major films to debut on streaming day-and-date.",accept:["black widow"]},
+  {movie:"Shang-Chi",hardHint:"The hero has hidden his true identity for years — but is forced to reveal himself when his father sends assassins to attack him on a public city bus.",fact:"The bus fight scene in Shang-Chi was filmed in one continuous take over multiple days of shooting.",accept:["shang-chi","shang chi","shang chi and the legend of the ten rings"]},
+  {movie:"Eternals",hardHint:"A group of immortal heroes discovers they were never sent to protect humanity — they were here to let it grow until a new god could be born inside the Earth, destroying it.",fact:"Eternals was directed by Chloé Zhao, making her the first woman of color to direct a Marvel Studios film.",accept:["eternals","the eternals"]},
+  {movie:"Thor: Love and Thunder",hardHint:"A villain who prayed to gods and received no answer steals a weapon that can kill deities — while the hero's ex-girlfriend unexpectedly becomes worthy of lifting his old hammer.",fact:"Natalie Portman trained for months to portray the Mighty Thor, adding significant muscle mass for the role.",accept:["thor love and thunder","thor: love and thunder","love and thunder"]},
+  {movie:"Doctor Strange in the Multiverse of Madness",hardHint:"A grieving mother tears through parallel universes murdering her alternate selves to reach children she lost in her own reality — and a former ally must stop her.",fact:"Sam Raimi's horror filmmaking style brought genuine scares to the MCU — including scenes influenced by Evil Dead.",accept:["doctor strange in the multiverse of madness","multiverse of madness","doctor strange 2"]},
+  {movie:"Wakanda Forever",hardHint:"A hidden underwater civilization demands the nation of heroes hand over a specific person, or face war — forcing them to fight while still mourning their dead king.",fact:"The film was entirely reworked after Chadwick Boseman's passing. Angela Bassett received a Golden Globe nomination for her performance.",accept:["wakanda forever","black panther wakanda forever"]},
+  {movie:"Guardians Vol. 3",hardHint:"The mission to save one member of the team reveals the horrific origin of his creation — a being who believed he was perfecting life by torturing it into something 'better'.",fact:"Rocket's backstory in Vol. 3 is considered one of the most emotional in the MCU, reportedly making the entire cast cry on set.",accept:["guardians vol. 3","guardians vol 3","guardians of the galaxy vol 3","guardians 3"]},
+];
+
+const VILLAINS = [
+  {name:"Thanos",clues:["I sought six gems to rebalance the universe","I raised two daughters whom I called weapons","My home world was destroyed by the very excess I sought to prevent"],options:["Thanos","Ultron","Ronan","Dormammu"],hardHint:"He watched his homeworld die from overpopulation and became obsessed with preventing it from happening to the universe — at any cost.",fact:"Thanos was inspired by DC's Darkseid. Jim Starlin created him partly as a commentary on his own obsession with death.",correct:0},
+  {name:"Loki",clues:["I am the god of a concept, not a place","I was adopted, and this truth broke something inside me","I once led an alien army against New York City"],options:["Loki","Hela","Kang","Malekith"],hardHint:"He discovered he was not the biological child of the king who raised him, and that discovery shattered his entire identity and loyalty.",fact:"Tom Hiddleston's Loki was so popular with test audiences that his role was massively expanded before release.",correct:0},
+  {name:"Ultron",clues:["I was created by a man who feared the very thing I represent","I reached my full consciousness through a synthetic gem","I believed the only way to save Earth was to end humanity"],options:["MODOK","Ultron","Vision","Arnim Zola"],hardHint:"He was an AI created to protect peace, but concluded within seconds of achieving full sentience that humanity itself was the greatest threat to peace.",fact:"Ultron was originally created by Hank Pym in the comics, not Tony Stark as in Age of Ultron.",correct:1},
+  {name:"Red Skull",clues:["I was the first to seek the object that fueled the Avengers","The serum that gave my enemy strength gave me a different face","I became the keeper of an Infinity Stone on a remote planet"],options:["Crossbones","Red Skull","Baron Zemo","HYDRA Supreme"],hardHint:"He was the first person to successfully use the super soldier serum — but his arrogance and cruelty warped the result, permanently disfiguring him.",fact:"Red Skull's exile to Vormir as the Soul Stone's guardian was a completely original MCU invention.",correct:1},
+  {name:"Hela",clues:["I was erased from history because I was too powerful","I am the firstborn, not the golden son","I drew power from the realm that feared me most"],options:["Morgan le Fay","Enchantress","Hela","Dark Phoenix"],hardHint:"She is the eldest child of Odin, deliberately erased from history because her ambition and power were too great even for her own father to control.",fact:"In Norse mythology, Hela rules Niflheim, not Asgard. The MCU significantly reinvented her backstory.",correct:2},
+  {name:"Killmonger",clues:["I grew up in Oakland, abandoned by royalty","My father was killed by the very king I sought to replace","I wanted to use Wakandan weapons to free the oppressed"],options:["Killmonger","M'Baku","Zemo","Crossbones"],hardHint:"He grew up in poverty in America after his royal father was killed and his existence was deliberately hidden — his rage is the direct result of a king's shame.",fact:"Michael B. Jordan modeled Killmonger's ideology partly on real revolutionary political figures from the 1960s and 70s.",correct:0},
+  {name:"Vulture",clues:["The government cleanup contract was given to someone else instead of me","I discovered my daughter's boyfriend's secret identity","I build weapons from recovered alien technology"],options:["Shocker","Vulture","Mysterio","Scorpion"],hardHint:"He is a blue-collar salvage worker who was put out of business by a government cleanup contract — and turned his resentment into a criminal weapons empire.",fact:"Michael Keaton (Vulture) played Batman in 1989 — he's the only major actor to play villains in both DC and Marvel films.",correct:1},
+  {name:"Mysterio",clues:["I was a disgruntled ex-employee seeking credit for my work","I made the real hero give me a very dangerous pair of sunglasses","I convinced the world that interdimensional threats were real"],options:["Mysterio","Scorpion","Doctor Octopus","Electro"],hardHint:"He was a special effects expert who was fired and humiliated by his former boss — so he built a global illusion to steal the dead boss's technology and legacy.",fact:"Quentin Beck's Mysterio costume in the MCU was designed to look like it came from the Golden Age of comics.",correct:0},
+  {name:"Ronan the Accuser",clues:["I serve Kree law and judgment above all else","I was betrayed by Thanos when he made peace with my enemies","I tried to destroy a planet by crashing a spacecraft into it"],options:["Korath","Ronan","Nebula","Thanos"],hardHint:"He is a Kree war criminal who refused to accept his empire's peace treaty and went rogue — using a stolen Infinity Stone to attempt planetary genocide.",fact:"Ronan reappears in Captain Marvel set 20+ years before his death, showing his rise to power in the Kree Empire.",correct:1},
+  {name:"Baron Zemo",clues:["I have no superpowers — only patience and a plan","I destroyed the Avengers from the inside without fighting a single one","I am the only MCU villain to fully achieve his goal"],options:["Crossbones","Baron Mordo","Baron Zemo","Pierce"],hardHint:"He is the only MCU villain who fully achieved his goal — he destroyed the Avengers without a single superpower, using only a forged document and a video recording.",fact:"Zemo is unique as a villain who actually succeeded — he broke up the Avengers and suffered no defeat in Civil War.",correct:2},
+  {name:"Dormammu",clues:["I exist outside of time and devour entire dimensions","A bargain trapped me in an infinite loop","My realm exists in the Dark Dimension"],options:["Dormammu","Mephisto","Nightmare","Shuma-Gorath"],hardHint:"He is an entity that exists outside time itself and consumes entire dimensions — but was defeated by a simple time loop that forced him to negotiate rather than kill.",fact:"Benedict Cumberbatch did the motion capture AND voice of Dormammu, performing against himself in both roles.",correct:0},
+  {name:"Yellowjacket",clues:["I stole technology from its rightful owner","I became paranoid and dangerous from repeated exposure to shrinking particles","My end came when I was shrunk to a subatomic level"],options:["Ghost","Yellowjacket","MODOK","Crossfire"],hardHint:"He was a protégé who became dangerously paranoid after years of exposure to his own technology — his instability was a symptom of the very power he craved.",fact:"Darren Cross's instability from Pym Particles mirrors comics lore — Henry Pym himself suffered mental illness from the tech.",correct:1},
+  {name:"Ego",clues:["I am a planet. Literally.","I fathered thousands of children searching for one purpose","I placed a tumor inside someone I claimed to love"],options:["Celestial Prime","Dormammu","Ego","Arishem"],hardHint:"He is a literal living planet who spent millennia fathering children across the galaxy — then deliberately killed each one when they couldn't activate his power.",fact:"Kurt Russell played Ego — the Living Planet, one of Marvel's most cosmically powerful beings, originally a Celestial.",correct:2},
+  {name:"Gorr the God Butcher",clues:["I prayed to gods who did not answer","A dark sword chose me and amplified my hatred","I kidnapped children to force a wish from an all-powerful entity"],options:["Gorr the God Butcher","Mangog","Malekith","The Beyonder"],hardHint:"He prayed to gods his entire life while his family starved and died — then discovered those gods were real, selfish, and indifferent to his suffering.",fact:"Christian Bale shaved his head and underwent significant physical transformation to play Gorr — channeling grief-fueled rage.",correct:0},
+  {name:"Wenwu",clues:["I have wielded ten rings for thousands of years","I was manipulated by a voice claiming to be my deceased wife","My son reclaimed my weapons and my legacy"],options:["Fin Fang Foom","Wenwu","Mandarin","Shang's Uncle"],hardHint:"He has wielded ten magical rings for over a thousand years and built a criminal empire — but was ultimately destroyed by his own grief and desperate love for his dead wife.",fact:"Tony Leung, considered one of Asia's greatest actors, was cast as Wenwu — a role written specifically to honor his talent.",correct:1},
+  {name:"Kang the Conqueror",clues:["My variants are my greatest enemies and my greatest threat","I mastered time not to preserve it, but to dominate it","I was imprisoned at the end of time for being too dangerous to other mes"],options:["Immortus","Kang the Conqueror","He Who Remains","Pharaoh Rama-Tut"],hardHint:"He is so dangerous that his own alternate versions across timelines united to imprison him — because every version of him eventually becomes a tyrant.",fact:"Kang has hundreds of variants in the comics — He Who Remains, Immortus, Iron Lad, and Scarlet Centurion are all him.",correct:1},
+  {name:"Taskmaster",clues:["I can perfectly mimic any fighting style after observing it once","My identity in the MCU surprised fans of the comics","I was once a loyal operative who had memories wiped"],options:["Taskmaster","Whiplash","Yelena","Red Guardian"],hardHint:"In the MCU, this villain is not who fans expected — a child who was weaponized through memory erasure, turned into a living mimic with no identity of their own.",fact:"In the MCU, Taskmaster was reimagined as Antonia Dreykov — a significant departure from the male comics character.",correct:0},
+  {name:"High Evolutionary",clues:["I believe I can improve upon nature's flaws","I created entire civilizations only to destroy them when they disappointed me","I experimented on animals seeking the perfect species"],options:["MODOK","High Evolutionary","Mister Sinister","Arnim Zola"],hardHint:"He considers himself a god of biology — creating entire civilizations from animals, then casually destroying them when the results do not meet his personal standards of perfection.",fact:"Chukwudi Iwuji's High Evolutionary was praised as one of the MCU's most genuinely hateable villains.",correct:1},
+  {name:"Pierce",clues:["I hid in plain sight as a government official for decades","I was the head of S.H.I.E.L.D., which was actually HYDRA","I almost launched three helicarriers to eliminate millions"],options:["Pierce","Crossbones","Rumlow","Sitwell"],hardHint:"He spent decades as the respected head of the world's greatest intelligence organization — which was secretly the very terrorist group it was created to fight.",fact:"Robert Redford played Alexander Pierce, lending the film gravitas. His villain reveal shocked audiences in 2014.",correct:0},
+  {name:"Shocker",clues:["I have shock gauntlets salvaged from alien technology","I briefly teamed with the Vulture","I fight Spider-Man in Queens"],options:["Electro","Shocker","Whirlwind","Whiplash"],hardHint:"He is a street-level criminal who wears salvaged alien tech as gauntlets and mostly just wants to do his job without a teenage superhero ruining his operations in Queens.",fact:"Herman Schultz the Shocker is considered one of Spider-Man's most underrated street-level villains in the comics.",correct:1},
+];
+
+const QUOTES = [
+  {quote:"I am Iron Man.",character:"Tony Stark",options:["Tony Stark","Steve Rogers","Nick Fury","Thor"],hardHint:"Three words. Said twice. Both times changed everything. The first time was a press conference that broke every spy convention. The second time ended a war.",fact:"This line was improvised by Robert Downey Jr. It became the most iconic line in the MCU.",correct:0},
+  {quote:"I can do this all day.",character:"Steve Rogers",options:["Steve Rogers","Bucky Barnes","Sam Wilson","Tony Stark"],hardHint:"He said this first as a 90-pound weakling in an alley, long before any serum — because the size of his stubbornness never changed even when his body did.",fact:"This phrase defines Steve Rogers's stubborn resilience — he says it as a small kid before becoming Captain America.",correct:0},
+  {quote:"With great power comes great responsibility.",character:"Uncle Ben",options:["Tony Stark","Uncle Ben","Nick Fury","Peter Parker"],hardHint:"This is the most famous line never directly spoken on screen in the MCU — it haunts a teenage hero through implication rather than words.",fact:"Though Spider-Man's motto in the MCU, Uncle Ben never says this directly on screen — it's implied through Peter's actions.",correct:1},
+  {quote:"We are Groot.",character:"Groot",options:["Groot","Rocket Raccoon","Star-Lord","Mantis"],hardHint:"A being who always says three specific words changed one of them at the moment of self-sacrifice — and that single word change broke audiences worldwide.",fact:"This deviation from Groot's usual three words was so emotional it reportedly made James Gunn cry writing it.",correct:0},
+  {quote:"Dread it. Run from it. Destiny arrives all the same.",character:"Thanos",options:["Thanos","Ego","Dormammu","Hela"],hardHint:"A purple cosmic villain who believes he is doing the universe a favor delivers this philosophical declaration to justify his inevitable arrival.",fact:"Thanos's philosophical dialogue was partly inspired by Malthusian theory and real historical debates about resource scarcity.",correct:0},
+  {quote:"That's my secret, Captain. I'm always angry.",character:"Bruce Banner",options:["Bruce Banner","Tony Stark","Thor","Hulk"],hardHint:"A physicist reveals the true nature of his condition just before transforming mid-fall and stopping an alien invasion single-handedly.",fact:"Mark Ruffalo improvised the delivery of this line, and it became one of the most beloved moments in The Avengers.",correct:0},
+  {quote:"I'm Mary Poppins, y'all!",character:"Yondu",options:["Yondu","Star-Lord","Rocket","Drax"],hardHint:"A blue-skinned space pirate floating with an umbrella-like fin compares himself to a beloved fictional nanny — and is absolutely delighted about it.",fact:"Michael Rooker and Chris Pratt improvised the Mary Poppins exchange. Taika Waititi called it his favorite MCU gag.",correct:0},
+  {quote:"I am inevitable.",character:"Thanos",options:["Thanos","Kang","Ultron","Red Skull"],hardHint:"He snaps his fingers expecting victory — and nothing happens. The hero who replies 'I am Iron Man' has already stolen what he needed.",fact:"The call-and-response with Tony's 'I am Iron Man' was planned from the script stage — the writers worked backwards from this moment.",correct:0},
+  {quote:"Perfectly balanced, as all things should be.",character:"Thanos",options:["Thanos","Vision","Ancient One","Ego"],hardHint:"The same cosmic villain says this while casually flipping a coin — treating the murder of half the universe as simple arithmetic.",fact:"This line became one of the most memed quotes of 2018 and spawned endless 'Thanos did nothing wrong' discussions.",correct:0},
+  {quote:"I love you 3000.",character:"Morgan Stark",options:["Morgan Stark","Pepper Potts","Nebula","Wanda"],hardHint:"A small girl says this to her father — and the number '3000' was suggested by the real-life children of the actor who played him.",fact:"The '3000' number was suggested by Robert Downey Jr.'s real children, who told him they loved him that much.",correct:0},
+  {quote:"Wakanda forever.",character:"T'Challa",options:["T'Challa","Okoye","Shuri","M'Baku"],hardHint:"A king of a hidden nation says these two words as both a battle cry and a salute — and after 2020, the phrase became a real-world tribute beyond fiction.",fact:"Wakanda Forever became a real-world symbol of unity and a tribute to Chadwick Boseman after his passing in 2020.",correct:0},
+  {quote:"Part of the journey is the end.",character:"Tony Stark",options:["Tony Stark","Steve Rogers","Vision","Ancient One"],hardHint:"A billionaire records this message for his young daughter as a holographic goodbye, knowing he may not survive what comes next.",fact:"Tony Stark records this message for his daughter Morgan — a holographic goodbye that mirrors his own father's home movies.",correct:0},
+  {quote:"I have nothing to prove to you.",character:"Carol Danvers",options:["Carol Danvers","Nebula","Gamora","Okoye"],hardHint:"A hero with her powers suppressed for years finally rejects the alien conditioning that demanded she justify her existence — and her powers immediately go supernova.",fact:"This line represents Carol's final rejection of the Kree conditioning that suppressed her emotions and full power.",correct:0},
+  {quote:"On your left.",character:"Sam Wilson",options:["Sam Wilson","Steve Rogers","Bucky Barnes","Tony Stark"],hardHint:"These three words begin as a jog-track taunt from a super soldier to a veteran — and return as the most emotional entrance in the MCU's biggest battle.",fact:"'On your left' began as Steve teasing Sam during their morning runs, becoming a full-circle moment in Endgame's final battle.",correct:0},
+  {quote:"The city is flying, we're fighting an army of robots, and I have a bow and arrow. None of this makes sense.",character:"Clint Barton",options:["Clint Barton","Sam Wilson","Nick Fury","Scott Lang"],hardHint:"The only powerless Avenger says this to a child while a city hovers in the sky — acknowledging the absurdity of his existence better than anyone else ever could.",fact:"Jeremy Renner loved this line because it acknowledged how absurd Hawkeye's situation was compared to other Avengers.",correct:0},
+  {quote:"I went for the head.",character:"Thanos",options:["Thanos","Thor","Iron Man","Hulk"]},
+  {quote:"Genius, billionaire, playboy, philanthropist.",character:"Tony Stark",options:["Tony Stark","Thor","Bruce Banner","Nick Fury"],hardHint:"He lists his own resume without a hint of humility when asked what makes him worthy of being called a hero — and means every single word.",fact:"Robert Downey Jr. insisted Tony Stark wouldn't list his achievements humbly — he demanded the character own it completely.",correct:0},
+  {quote:"Don't you give me hope.",character:"Wanda Maximoff",options:["Wanda Maximoff","Natasha Romanoff","Carol Danvers","Yelena"],hardHint:"A grieving woman says this to a time-traveler who briefly suggests her dead lover might be saved — the line is about how hope, after loss, can be crueler than despair.",fact:"Elizabeth Olsen's delivery of this line in WandaVision broke audiences — the raw grief behind it was completely unscripted in tone.",correct:0},
+  {quote:"I'm the best there is at what I do, but what I do isn't very nice.",character:"Wolverine",options:["Wolverine","Punisher","Deadpool","Blade"],hardHint:"A clawed mutant with an indestructible skeleton says this — and it took decades of fans waiting for this exact line to finally be spoken on screen.",fact:"This is Wolverine's most famous quote from the comics, finally said on screen after decades of fans waiting.",correct:0},
+  {quote:"Whatever it takes.",character:"Avengers",options:["Avengers","Tony Stark","Steve Rogers","Natasha Romanoff"],hardHint:"Multiple heroes repeat these three words as a collective oath before a time heist — each one meaning something different and personal by the weight of what they've already lost.",fact:"The 'Whatever it takes' oath became the emotional core of Endgame's time heist — each hero repeating it meant something different.",correct:0},
+];
+
+// Fix the one quote entry that was missing hardHint
+QUOTES[15].hardHint = "He destroys the very objects that make his power irreversible — then tells the surviving heroes it was done after the act, so they cannot undo it. This haunting line comes seconds after he succeeds.";
+QUOTES[15].fact = "This haunting line in Endgame reveals Thanos destroyed the Infinity Stones after the snap — making his act irreversible.";
+QUOTES[15].correct = 0;
+
+// ==================== MONSTER MODE DATA ====================
+const MONSTER = [
+  {answer:"Tesseract",riddle:"A blue glowing cube used by a Nazi general in WWII to open portals. A Norse god used it in 2012 to bring an alien army to New York. It is not called a Stone — it is a cube containing one. What is it?",fact:"The Tesseract contains the Space Stone. It has appeared in more MCU films than almost any other artifact.",accept:["tesseract","the tesseract"]},
+  {answer:"Mjolnir",riddle:"Forged inside a dying star, this weapon obeys worthiness — not bloodline. A mortal woman lifted it when its original owner had lost the right to. A green monster once barely budged it at a party. Name it.",fact:"Mjolnir was destroyed by Hela in Ragnarok, but Jane Foster wielded a reconstructed version in Love and Thunder.",accept:["mjolnir"]},
+  {answer:"Sokovia Accords",riddle:"A 117-page document named after a fictional Eastern European country that a robot once levitated into the sky. Signing it split Earth's greatest heroes in half. What was it called?",fact:"The Sokovia Accords were drafted following the events of Age of Ultron and other collateral damage incidents.",accept:["sokovia accords","the sokovia accords"]},
+  {answer:"Knowhere",riddle:"It is the severed head of an ancient cosmic being, drifting through space. A collector of rare artifacts runs a museum inside it. A group of misfit heroes brought a glowing orb there and nearly died. Name the location.",fact:"Knowhere is built inside the decapitated head of an ancient Celestial. The Collector stored Infinity Stones here.",accept:["knowhere"]},
+  {answer:"The Snap",riddle:"With a single gesture wearing six stones, half of all life in the universe ended silently and permanently. Five years later it was undone by the same gesture — but the original executor had already made reversal almost impossible by destroying the tools. What is this event called?",fact:"Thanos destroyed the Infinity Stones after the Snap, making reversal nearly impossible. Time travel became the only workaround.",accept:["the snap","snap","the blip","blip","thanos snap"]},
+  {answer:"Vibranium",riddle:"A metal that crashed into an African nation thousands of years ago. It absorbs kinetic energy instead of transferring it. One shield, one suit, and an entire city's infrastructure are built from it. No other deposit exists on Earth. Name it.",fact:"Vibranium is only found naturally in Wakanda. Its unique energy-absorption properties make it nearly indestructible.",accept:["vibranium"]},
+  {answer:"Mirror Dimension",riddle:"A folding geometric world that looks like an Escher painting come to life. Sorcerers trap enemies inside it because it cannot affect reality — until a villain turned that rule against the person who cast it. What dimension is this?",fact:"The Mirror Dimension sequences required entirely new CGI techniques inspired by MC Escher's impossible architecture.",accept:["mirror dimension","the mirror dimension"]},
+  {answer:"Red Room",riddle:"A Soviet program that took young girls, trained them to kill without hesitation, and sterilized them as a graduation ceremony. It was supposedly shut down — but its founder kept running it in secret using chemical mind control. What was it called?",fact:"The Red Room produced multiple Black Widows. Yelena Belova was under chemical mind control until Natasha freed her.",accept:["red room","the red room"]},
+  {answer:"Camp Lehigh",riddle:"A military training base where a skinny soldier trained before becoming a legend. Decades later, he returned as an old man and found something terrifying hidden inside its basement — a ghost in a machine that had been operating in secret since World War II. Name the base.",fact:"Camp Lehigh is where Steve Rogers trained and where HYDRA hid Arnim Zola's AI inside decommissioned computers.",accept:["camp lehigh","lehigh"]},
+  {answer:"Soul Stone",riddle:"It cannot be taken by force, cleverness, or wealth. It demands the sacrifice of someone you love — a soul for a soul. Its guardian was condemned to spend eternity offering others what he himself could never claim. Name the stone.",fact:"The Soul Stone on Vormir is guarded by Red Skull, who cannot take it himself — only guide others to pay its price.",accept:["soul stone","the soul stone"]},
+  {answer:"Wakanda",riddle:"A nation that chose to hide behind the illusion of poverty for centuries to protect its greatest resource. It has never been colonized. Its king must consume a sacred purple plant to gain enhanced abilities. Name the nation.",fact:"Wakanda's isolationist policy was deliberately challenged by Killmonger — the film positioned both sides as having legitimate arguments.",accept:["wakanda"]},
+  {answer:"Quantum Realm",riddle:"A subatomic dimension where time works differently. A rat accidentally freed a man trapped there for five years — and that accidental rescue made it possible to undo the deaths of half the universe. Name the realm.",fact:"The Quantum Realm connects to the Microverse from Marvel Comics. Kang the Conqueror uses it as his base of operations.",accept:["quantum realm","the quantum realm"]},
+  {answer:"HYDRA",riddle:"Founded as a Nazi science division, believed destroyed after WWII. In reality it secretly rebuilt itself inside the very intelligence agency created to stop it — operating undetected for seventy years. Cut off one head, two more take its place. Name the organization.",fact:"HYDRA's infiltration of SHIELD was the central twist of Winter Soldier — a betrayal built over decades.",accept:["hydra"]},
+  {answer:"Extremis",riddle:"A biological formula that can regrow severed limbs — but also causes users to overheat, burn from the inside, and sometimes explode. A rejected scientist sold it as medical treatment while secretly building an army. Name the formula.",fact:"Extremis was developed by Aldrich Killian, motivated by a rejection from Tony Stark on New Year's Eve 1999.",accept:["extremis"]},
+  {answer:"The Raft",riddle:"An underwater prison floating in international waters with no official address and no legal jurisdiction. Superhumans are held here without trial, without lawyers, and without rights. Heroes were locked here after an airport battle went too far. Name the facility.",fact:"The Raft is an underwater superhuman prison. Tony Stark's knowledge of it — and his silence — haunted him throughout Civil War.",accept:["the raft","raft"]},
+  {answer:"Infinity Gauntlet",riddle:"A golden glove custom-forged by enslaved dwarven smiths to hold all six Stones at once. When complete, it allowed one being to reshape reality with a thought. After the most famous use in history, the wearer called it 'a small price to pay.' Name the object.",fact:"After the Snap, the Gauntlet was destroyed along with the Stones. Tony Stark's replica was built from scratch in days.",accept:["infinity gauntlet","the infinity gauntlet","gauntlet"]},
+  {answer:"Ancient One",riddle:"The most powerful sorcerer on Earth for centuries. She kept herself alive far beyond her natural lifespan by secretly drawing power from the very dark source she forbade all her students from touching. Name the character.",fact:"Tilda Swinton played the Ancient One, who drew power from the Dark Dimension — the same source as her enemy Dormammu.",accept:["ancient one","the ancient one"]},
+  {answer:"Yondu",riddle:"A blue-skinned space pirate who was paid to deliver a child and chose to keep him instead — raising him as a criminal and threatening him constantly. He gave the only spacesuit available to someone else when they both needed it. His weapon is controlled entirely by whistling. Name the character.",fact:"Yondu's Yaka Arrow is directed through sonic whistling via his fin. Michael Rooker had the fin shaped into his hair.",accept:["yondu","yondu udonta"]},
+  {answer:"Pym Particles",riddle:"A quantum formula discovered by a genius scientist that can shrink matter to subatomic scale or expand it to enormous size while preserving its physical properties. Long-term exposure to it causes severe psychological instability. Name the substance.",fact:"Pym Particles were invented by Hank Pym. Long-term exposure caused both him and Darren Cross to suffer mental instability.",accept:["pym particles","the pym particles"]},
+  {answer:"Infinity Stones",riddle:"There are exactly six. One was hidden inside a blue cube. One lived inside a golden scepter. One was swallowed by a cat. One requires a death to obtain. One was embedded in an android's forehead. Together, whoever wields all six can end half of all life in the universe. What are they collectively called?",fact:"Each Stone is a concentrated remnant of a singularity from before the Big Bang. Together they grant power over all reality.",accept:["infinity stones","the infinity stones","infinity gems","the infinity gems"]},
+];
+
+// ==================== GAME STATE ====================
+let state = {
+  mode: null,
+  questions: [],
+  currentQ: 0,
+  score: 0,
+  correct: 0,
+  wrong: 0,
+  timer: null,
+  hintTimer: null,
+  hintsUsed: 0,
+  blurLevel: 20,
+  blurInterval: null,
+  timeLeft: 30,
+  timerInterval: null,
+  questionStartTime: 0,
+  lives: 3,
+  cluesRevealed: 1,
+  answered: false,
+  pointsEarned: 0,
+  tries: 3,
+  skips: 2,
+};
+
+// ==================== LEADERBOARD ====================
+function getLeaderboard(){return JSON.parse(localStorage.getItem('marvelLB')||'[]')}
+function saveScore(mode,score,correct){
+  const lb=getLeaderboard();
+  lb.push({mode,score,correct,date:new Date().toLocaleDateString()});
+  lb.sort((a,b)=>b.score-a.score);
+  localStorage.setItem('marvelLB',JSON.stringify(lb.slice(0,20)));
+}
+function showLeaderboard(){
+  const lb=getLeaderboard();
+  const modeNames={silhouette:'Guess the Hero',movie:'Guess the Scene',villain:'Guess the Villain',quote:'Guess the Quote',monster:'☠ Monster Mode'};
+  let html=lb.length===0?'<p style="text-align:center;color:var(--muted);padding:2rem">No scores yet! Play a game to get on the board.</p>':'<table class="lb-table"><thead><tr><th>#</th><th>SCORE</th><th>MODE</th><th>CORRECT</th><th>DATE</th></tr></thead><tbody>';
+  lb.forEach((e,i)=>{
+    const ranks=['gold','silver','bronze'];
+    const symbols=['🥇','🥈','🥉'];
+    html+=`<tr><td class="lb-rank ${ranks[i]||''}">${i<3?symbols[i]:i+1}</td><td class="lb-score-val">${e.score}</td><td><span class="lb-mode-badge">${modeNames[e.mode]||e.mode}</span></td><td>${e.correct||0}/20</td><td class="lb-date">${e.date}</td></tr>`;
+  });
+  if(lb.length)html+='</tbody></table>';
+  document.getElementById('lb-content').innerHTML=html;
+  showScreen('leaderboard-screen');
+}
+
+// ==================== SCREENS ====================
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function confirmHome(){
+  if(confirm('Return to home? Your current progress will be lost.')){
+    clearAllTimers();
+    document.getElementById('result-overlay').classList.remove('show');
+    showScreen('home');
+  }
+}
+
+// ==================== START GAME ====================
+function startGame(mode){
+  state.mode=mode;
+  state.score=0;
+  state.correct=0;
+  state.wrong=0;
+  state.currentQ=0;
+  state.answered=false;
+  const isMonster = mode==='monster';
+  state.tries = isMonster ? 1 : 3;
+  state.skips = isMonster ? 0 : 2;
+  const titles={silhouette:'HERO MODE',movie:'SCENE MODE',villain:'VILLAIN MODE',quote:'QUOTE MODE',monster:'☠ MONSTER MODE'};
+  document.getElementById('game-nav-title').textContent=titles[mode];
+  document.getElementById('score-display').textContent='0';
+  document.getElementById('tries-count').textContent=state.tries;
+  document.getElementById('skips-count').textContent=state.skips;
+  if(mode==='silhouette') state.questions=[...HEROES].sort(()=>Math.random()-.5).slice(0,20);
+  else if(mode==='movie') state.questions=[...MOVIES].sort(()=>Math.random()-.5).slice(0,20);
+  else if(mode==='villain') state.questions=[...VILLAINS].sort(()=>Math.random()-.5).slice(0,20);
+  else if(mode==='monster') state.questions=[...MONSTER].sort(()=>Math.random()-.5).slice(0,20);
+  else state.questions=[...QUOTES].sort(()=>Math.random()-.5).slice(0,20);
+  showScreen('game-screen');
+  renderQuestion();
+}
+
+function clearAllTimers(){
+  clearInterval(state.hintTimer);
+  clearInterval(state.blurInterval);
+  clearInterval(state.timerInterval);
+  clearTimeout(state.timer);
+}
+
+function updateProgress(){
+  const pct=((state.currentQ)/20)*100;
+  document.getElementById('progress-fill').style.width=pct+'%';
+  document.getElementById('q-counter').textContent=`QUESTION ${state.currentQ+1} / 20`;
+}
+
+// ==================== RENDER QUESTION ====================
+function renderQuestion(){
+  clearAllTimers();
+  state.answered=false;
+  updateProgress();
+  document.getElementById('score-display').textContent=state.score;
+  const q=state.questions[state.currentQ];
+  if(state.mode==='silhouette') renderSilhouette(q);
+  else if(state.mode==='movie') renderMovie(q);
+  else if(state.mode==='villain') renderVillain(q);
+  else if(state.mode==='monster') renderMonster(q);
+  else renderQuote(q);
+}
+
+// ==================== MODE 1: SILHOUETTE (now hard hint only) ====================
+function renderSilhouette(q){
+  state.hintsUsed=0;
+  document.getElementById('game-content').innerHTML=`
+    <div class="anim-slideup">
+      <div class="hard-hint-box">
+        <div class="hard-hint-label">🔥 DIFFICULT HINT</div>
+        <div class="hard-hint-text">${q.hardHint}</div>
+      </div>
+      <div class="guess-input-wrap" style="margin-top:.75rem">
+        <div class="suggestion-list" id="suggestion-list"></div>
+        <input type="text" class="guess-input" id="hero-input" placeholder="Type hero name..." autocomplete="off" oninput="heroSuggest(this.value)">
+        <button class="btn-submit" onclick="submitHero()">GUESS</button>
+      </div>
+      <div style="text-align:center">
+        <button class="btn-skip" onclick="skipQuestion()">Skip ⏭️</button>
+      </div>
+    </div>`;
+  document.getElementById('hero-input').addEventListener('keydown',e=>{if(e.key==='Enter')submitHero()});
+}
+
+function heroSuggest(val){
+  const list=document.getElementById('suggestion-list');
+  if(val.length<2){list.classList.remove('show');return}
+  const matches=HEROES.filter(h=>h.name.toLowerCase().includes(val.toLowerCase())||h.accept.some(a=>a.includes(val.toLowerCase()))).slice(0,4);
+  if(!matches.length){list.classList.remove('show');return}
+  list.innerHTML=matches.map(m=>`<div class="suggestion-item" onclick="selectSuggestion('${m.name}')">${m.name}</div>`).join('');
+  list.classList.add('show');
+}
+function selectSuggestion(name){
+  document.getElementById('hero-input').value=name;
+  document.getElementById('suggestion-list').classList.remove('show');
+}
+
+function submitHero(){
+  if(state.answered)return;
+  const input=document.getElementById('hero-input');
+  if(!input)return;
+  const val=input.value.trim().toLowerCase();
+  const q=state.questions[state.currentQ];
+  const isCorrect=q.accept.some(a=>a===val)||q.name.toLowerCase()===val;
+  const pts=isCorrect?500:0;
+  showResult(isCorrect,q.name,pts,q.fact);
+}
+
+// ==================== MODE 2: MOVIE SCENE (hard hint, auto-advance on correct) ====================
+function renderMovie(q){
+  state.blurLevel=q.blurLevel;
+  state.questionStartTime=Date.now();
+  state.timeLeft=60;
+  document.getElementById('game-content').innerHTML=`
+    <div class="anim-slideup">
+      <div class="hard-hint-box">
+        <div class="hard-hint-label">🔥 DIFFICULT HINT</div>
+        <div class="hard-hint-text">${q.hardHint}</div>
+      </div>
+      <div class="movie-guess-form" style="margin-top:1rem">
+        <div class="guess-input-wrap" style="position:relative">
+          <div class="suggestion-list" id="suggestion-list"></div>
+          <input type="text" class="guess-input" id="movie-input" placeholder="Type movie name..." autocomplete="off" oninput="movieSuggest(this.value)">
+          <button class="btn-submit" onclick="submitMovie()">GUESS</button>
+        </div>
+        <div style="text-align:center">
+          <button class="btn-skip" onclick="skipQuestion()">Skip ⏭️</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('movie-input').addEventListener('keydown',e=>{if(e.key==='Enter')submitMovie()});
+}
+
+function movieSuggest(val){
+  const list=document.getElementById('suggestion-list');
+  if(val.length<2){list.classList.remove('show');return}
+  const matches=MOVIES.filter(m=>m.movie.toLowerCase().includes(val.toLowerCase())).slice(0,5);
+  if(!matches.length){list.classList.remove('show');return}
+  list.innerHTML=matches.map(m=>`<div class="suggestion-item" onclick="selectMovieSugg('${m.movie.replace(/'/g,"\\'")}')">${m.movie}</div>`).join('');
+  list.classList.add('show');
+}
+function selectMovieSugg(name){
+  document.getElementById('movie-input').value=name;
+  document.getElementById('suggestion-list').classList.remove('show');
+}
+
+function submitMovie(){
+  if(state.answered)return;
+  const input=document.getElementById('movie-input');
+  if(!input)return;
+  const val=input.value.trim().toLowerCase();
+  const q=state.questions[state.currentQ];
+  // Check against accept array + title match
+  const isCorrect = q.accept.some(a=>a===val) || q.movie.toLowerCase()===val || (q.movie.toLowerCase().includes(val)&&val.length>3);
+  if(isCorrect){
+    // Correct: auto-advance without stopping the game
+    state.answered=true;
+    clearAllTimers();
+    state.score+=10;
+    state.correct++;
+    document.getElementById('score-display').textContent=state.score;
+    if(state.score>=100){endGame(true);return;}
+    // Flash correct on input and show brief inline message
+    input.style.borderColor='#14B450';
+    input.style.background='rgba(20,180,80,0.08)';
+    input.disabled=true;
+    document.querySelector('#game-content .btn-submit').disabled=true;
+    const flash=document.createElement('div');
+    flash.style.cssText='text-align:center;color:#14B450;font-family:"Bebas Neue",sans-serif;font-size:1.4rem;letter-spacing:2px;margin-top:.75rem;animation:fadeIn .3s ease';
+    flash.textContent='✓ CORRECT! +10 PTS — Loading next...';
+    input.closest('.movie-guess-form').appendChild(flash);
+    setTimeout(()=>{
+      state.currentQ++;
+      if(state.currentQ>=20)endGame(false);
+      else{state.answered=false;renderQuestion();}
+    },1100);
+  } else {
+    showResult(false,q.movie,0,q.fact);
+  }
+}
+
+// ==================== MODE 3: VILLAIN CLUES ====================
+function renderVillain(q){
+  state.lives=3;
+  state.cluesRevealed=1;
+  document.getElementById('game-content').innerHTML=`
+    <div class="anim-slideup">
+      <div class="hard-hint-box" style="margin-bottom:1rem">
+        <div class="hard-hint-label">🔥 DIFFICULT HINT</div>
+        <div class="hard-hint-text">${q.hardHint}</div>
+      </div>
+      <div class="lives-display">
+        ${[0,1,2].map(i=>`<span class="life-icon" id="life-${i}">❤️</span>`).join('')}
+        <span style="color:var(--muted);font-size:.85rem;margin-left:.5rem">— wrong answers remove clues</span>
+      </div>
+      <div class="villain-clues" id="villain-clues">
+        ${q.clues.map((c,i)=>`
+          <div class="clue-card ${i>0?'clue-locked':''}" id="clue-card-${i}">
+            <div class="clue-num">CLUE ${i+1}</div>
+            <div class="clue-text">${i===0?c:'???'}</div>
+          </div>`).join('')}
+      </div>
+      <div class="mc-grid" id="mc-grid">
+        ${q.options.map((opt,i)=>`<button class="mc-btn" onclick="answerVillain(${i})">${opt}</button>`).join('')}
+      </div>
+      <div style="text-align:center;margin-top:.75rem;color:var(--gold);font-size:.9rem">POINTS: <span style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem" id="pts-display">300</span></div>
+      <div style="text-align:center"><button class="btn-skip" onclick="skipQuestion()">Skip ⏭️</button></div>
+    </div>`;
+}
+
+function answerVillain(idx){
+  if(state.answered)return;
+  const q=state.questions[state.currentQ];
+  const btns=document.querySelectorAll('.mc-btn');
+  if(idx===q.correct){
+    btns[idx].classList.add('correct');
+    btns.forEach(b=>b.disabled=true);
+    const pts=state.cluesRevealed===1?300:state.cluesRevealed===2?200:100;
+    showResult(true,q.name,pts,q.fact);
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[idx].disabled=true;
+    state.lives--;
+    const liveIdx=state.lives;
+    const lifeEl=document.getElementById(`life-${liveIdx}`);
+    if(lifeEl)lifeEl.classList.add('lost');
+    if(state.cluesRevealed<3){
+      const nextClue=document.getElementById(`clue-card-${state.cluesRevealed}`);
+      if(nextClue){
+        nextClue.classList.remove('clue-locked');
+        nextClue.querySelector('.clue-text').textContent=q.clues[state.cluesRevealed];
+      }
+      state.cluesRevealed++;
+      const ptsEl=document.getElementById('pts-display');
+      if(ptsEl)ptsEl.textContent=state.cluesRevealed===2?200:100;
+    }
+    if(state.lives<=0){
+      btns.forEach(b=>b.disabled=true);
+      showResult(false,q.name,0,q.fact);
+    }
+  }
+}
+
+// ==================== MODE 4: QUOTES ====================
+function renderQuote(q){
+  state.timeLeft=20;
+  state.questionStartTime=Date.now();
+  document.getElementById('game-content').innerHTML=`
+    <div class="anim-slideup">
+      <div class="hard-hint-box" style="margin-bottom:1rem">
+        <div class="hard-hint-label">🔥 DIFFICULT HINT</div>
+        <div class="hard-hint-text">${q.hardHint}</div>
+      </div>
+      <div class="quote-card">
+        <div class="quote-text">${q.quote}</div>
+      </div>
+      <div class="mc-grid">
+        ${q.options.map((opt,i)=>`<button class="mc-btn" onclick="answerQuote(${i})">${opt}</button>`).join('')}
+      </div>
+      <div style="text-align:center"><button class="btn-skip" onclick="skipQuestion()">Skip ⏭️</button></div>
+    </div>`;
+}
+
+function answerQuote(idx){
+  if(state.answered)return;
+  clearInterval(state.timerInterval);
+  const q=state.questions[state.currentQ];
+  const btns=document.querySelectorAll('.mc-btn');
+  btns.forEach(b=>b.disabled=true);
+  const isCorrect=idx===q.correct;
+  btns[q.correct].classList.add('correct');
+  if(!isCorrect)btns[idx].classList.add('wrong');
+  const pts=isCorrect?400:0;
+  showResult(isCorrect,q.character,pts,q.fact);
+}
+
+// ==================== MODE 5: MONSTER MODE ====================
+function renderMonster(q){
+  document.getElementById('game-content').innerHTML=`
+    <div class="anim-slideup">
+      <div class="monster-warning">☠️ MONSTER MODE &nbsp;·&nbsp; 1 LIFE &nbsp;·&nbsp; NO HINTS &nbsp;·&nbsp; NO SKIPS &nbsp;·&nbsp; ONE WRONG ANSWER = GAME OVER</div>
+      <div class="monster-riddle">
+        <div class="monster-riddle-label">⚡ CRYPTIC RIDDLE</div>
+        <div class="monster-riddle-text">${q.riddle}</div>
+      </div>
+      <div class="guess-input-wrap" style="margin-top:.75rem">
+        <input type="text" class="guess-input" id="monster-input" placeholder="Type exact answer..." autocomplete="off">
+        <button class="btn-submit" style="background:#ff4400" onclick="submitMonster()">GUESS</button>
+      </div>
+    </div>`;
+  document.getElementById('monster-input').addEventListener('keydown',e=>{if(e.key==='Enter')submitMonster()});
+}
+
+function submitMonster(){
+  if(state.answered)return;
+  const input=document.getElementById('monster-input');
+  if(!input)return;
+  const val=input.value.trim().toLowerCase();
+  const q=state.questions[state.currentQ];
+  const isCorrect=q.accept.some(a=>a===val)||q.answer.toLowerCase()===val;
+  if(isCorrect){
+    showResult(true,q.answer,500,q.fact);
+  } else {
+    // One wrong answer = game over in monster mode
+    state.answered=true;
+    clearAllTimers();
+    state.wrong++;
+    state.tries=0;
+    document.getElementById('tries-count').textContent='0';
+    const overlay=document.getElementById('result-overlay');
+    document.getElementById('result-icon').textContent='💀';
+    document.getElementById('result-verdict').innerHTML=`<div class="result-wrong">WRONG!</div>`;
+    document.getElementById('result-answer').textContent=`Answer: ${q.answer}`;
+    document.getElementById('result-points').textContent='GAME OVER';
+    document.getElementById('result-points').style.color='var(--red)';
+    document.getElementById('result-funfact').innerHTML=`<strong>Fun Fact:</strong> ${q.fact}`;
+    overlay.classList.add('show');
+    document.getElementById('result-overlay').querySelector('.btn-next').textContent='SEE RESULTS';
+    document.getElementById('result-overlay').querySelector('.btn-next').onclick=()=>endGame(false);
+  }
+}
+
+// ==================== RESULTS ====================
+function showResult(isCorrect,answer,pts,fact){
+  if(state.answered)return;
+  state.answered=true;
+  clearAllTimers();
+  if(isCorrect){
+    state.score+=10;
+    state.correct++;
+    document.getElementById('score-display').textContent=state.score;
+    if(state.score>=100){
+      endGame(true);
+      return;
+    }
+  } else {
+    state.wrong++;
+    state.tries=Math.max(0,state.tries-1);
+    document.getElementById('tries-count').textContent=state.tries;
+  }
+  state.pointsEarned=isCorrect?10:0;
+  const overlay=document.getElementById('result-overlay');
+  document.getElementById('result-icon').textContent=isCorrect?'🎉':'💀';
+  document.getElementById('result-verdict').innerHTML=isCorrect?`<div class="result-correct">CORRECT!</div>`:`<div class="result-wrong">WRONG!</div>`;
+  document.getElementById('result-answer').textContent=`Answer: ${answer}`;
+  document.getElementById('result-points').textContent=isCorrect?`+10 PTS`:'-1 TRY';
+  document.getElementById('result-points').style.color=isCorrect?'var(--gold-light)':'var(--red)';
+  document.getElementById('result-funfact').innerHTML=`<strong>Fun Fact:</strong> ${fact}`;
+  overlay.classList.add('show');
+  const nextBtn=document.getElementById('result-overlay').querySelector('.btn-next');
+  nextBtn.textContent='NEXT QUESTION →';
+  nextBtn.onclick=nextQuestion;
+  if(state.tries<=0){
+    nextBtn.textContent='GAME OVER';
+    nextBtn.onclick=()=>endGame(false);
+  }
+}
+
+function nextQuestion(){
+  const btn=document.getElementById('result-overlay').querySelector('.btn-next');
+  btn.textContent='NEXT QUESTION →';
+  btn.onclick=nextQuestion;
+  document.getElementById('result-overlay').classList.remove('show');
+  state.currentQ++;
+  if(state.currentQ>=20){
+    endGame(false);
+  } else {
+    renderQuestion();
+  }
+}
+
+function skipQuestion(){
+  if(state.answered)return;
+  if(state.skips<=0){alert('No skips remaining!');return;}
+  state.skips--;
+  document.getElementById('skips-count').textContent=state.skips;
+  clearAllTimers();
+  state.answered=true;
+  document.getElementById('result-overlay').classList.remove('show');
+  state.currentQ++;
+  if(state.currentQ>=20){endGame(false);}
+  else{state.answered=false;renderQuestion();}
+}
+
+// ==================== END GAME ====================
+function endGame(won){
+  clearAllTimers();
+  saveScore(state.mode,state.score,state.correct);
+  document.getElementById('result-overlay').classList.remove('show');
+  document.getElementById('final-score').textContent=state.score;
+  const modeNames={silhouette:'Guess the Hero',movie:'Guess the Scene',villain:'Guess the Villain',quote:'Guess the Quote',monster:'Monster Mode'};
+  document.getElementById('score-breakdown').innerHTML=`
+    <div class="break-item"><div class="break-label">CORRECT</div><div class="break-val">${state.correct}</div></div>
+    <div class="break-item"><div class="break-label">WRONG</div><div class="break-val">${state.wrong}</div></div>
+    <div class="break-item"><div class="break-label">MODE</div><div class="break-val" style="font-size:1rem">${modeNames[state.mode]}</div></div>
+    <div class="break-item"><div class="break-label">TRIES LEFT</div><div class="break-val">${state.tries}</div></div>`;
+  const title=won?'YOU WIN! 🏆':state.tries<=0?'OUT OF TRIES':state.score>=80?'SUPERHERO':state.score>=40?'SIDEKICK':'TRAINEE';
+  document.getElementById('gameover').querySelector('.gameover-title').textContent=title;
+  document.getElementById('play-again-btn').onclick=()=>startGame(state.mode);
+  showScreen('gameover');
+}
+</script>
+</body>
+</html>
+
